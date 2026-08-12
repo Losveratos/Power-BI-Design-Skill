@@ -43,15 +43,15 @@ in `.claude/skills/` (per project) or `~/.claude/skills/` (personal).
 **Per project** (recommended — versioned with your report repo):
 
 ```bash
-git clone https://github.com/Losveratos/Power-BI-Desgin-Skill.git
+git clone https://github.com/Losveratos/Power-BI-Design-Skill.git
 mkdir -p your-project/.claude/skills
-cp -r Power-BI-Desgin-Skill/skill your-project/.claude/skills/powerbi-design-framework
+cp -r Power-BI-Design-Skill/skill your-project/.claude/skills/powerbi-design-framework
 ```
 
 **Personal** (available in every project):
 
 ```bash
-cp -r Power-BI-Desgin-Skill/skill ~/.claude/skills/powerbi-design-framework
+cp -r Power-BI-Design-Skill/skill ~/.claude/skills/powerbi-design-framework
 ```
 
 Requirements: Claude Code, Python 3.10+ (standard library only — no pip
