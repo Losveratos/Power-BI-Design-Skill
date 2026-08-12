@@ -1,0 +1,60 @@
+# COPY TEMPLATE — copy into .github/workflows/ of the report repo, adjust paths.
+#
+# Prerequisite: bulk_restyle.py and check_contrast.py live in the same repo
+# (e.g. under tools/design/ — see TOOLS_DIR below). Copy them together with
+# this file from the skill: .claude/skills/powerbi-design-framework/scripts/
+#
+# Also expects design-out/zones.json and design-out/palette.json from the
+# skill run (step "store artifacts"). If either file is missing, the
+# corresponding step is skipped cleanly instead of failing — so the gate
+# stays usable even before both artifacts exist.
+#
+# No pip dependencies needed: both scripts are stdlib-only (json, re,
+# argparse, …). setup-python with 3.11 is sufficient.
+
+name: Design-Lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main   # adjust to the actual default branch if needed
+
+env:
+  # Path to the copied scripts within this repo.
+  TOOLS_DIR: tools/design
+  # Path to the PBIP report folder (the *.Report folder or its parent folder).
+  REPORT_PATH: .
+  # Allowed font families for the design system (comma-separated).
+  ALLOWED_FONTS: "Segoe UI,Segoe UI Semibold"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Design linter (geometry, fonts, shadows)
+        run: |
+          if [ -f "design-out/zones.json" ]; then
+            python "${TOOLS_DIR}/bulk_restyle.py" "${REPORT_PATH}" \
+              --check \
+              --zones design-out/zones.json \
+              --fonts "${ALLOWED_FONTS}"
+          else
+            echo "::notice::design-out/zones.json missing — design linter skipped. Generate it with the powerbi-design-framework skill."
+          fi
+
+      - name: Contrast check (WCAG AA)
+        run: |
+          if [ -f "design-out/palette.json" ]; then
+            python "${TOOLS_DIR}/check_contrast.py" --palette design-out/palette.json
+          else
+            echo "::notice::design-out/palette.json missing — contrast check skipped. Generate it with the powerbi-design-framework skill."
+          fi
